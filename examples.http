@@ -1,0 +1,100 @@
+### Ejemplos de uso de la API del Sistema de Agendamiento de Citas
+
+## Obtener la página principal
+GET http://localhost:8000/
+
+###
+
+## Agendar una nueva cita
+POST http://localhost:8000/citas/agendar
+Content-Type: application/json
+
+{
+  "nombre": "Juan Pérez",
+  "email": "juan@example.com",
+  "fecha": "2024-03-15",
+  "hora": "14:30",
+  "descripcion": "Consulta de servicios generales"
+}
+
+###
+
+## Agendar otra cita
+POST http://localhost:8000/citas/agendar
+Content-Type: application/json
+
+{
+  "nombre": "María García",
+  "email": "maria@example.com",
+  "fecha": "2024-03-16",
+  "hora": "10:00",
+  "descripcion": "Asesoría para nuevos clientes"
+}
+
+###
+
+## Obtener todas las citas
+GET http://localhost:8000/citas
+
+###
+
+## Endpoint de ejemplo
+GET http://localhost:8000/hello/World
+
+###
+
+## Ejemplo de validación: Descripción muy corta
+POST http://localhost:8000/citas/agendar
+Content-Type: application/json
+
+{
+  "nombre": "Test",
+  "email": "test@example.com",
+  "fecha": "2024-03-15",
+  "hora": "14:30",
+  "descripcion": "Corta"
+}
+
+###
+
+## Ejemplo de validación: Email inválido
+POST http://localhost:8000/citas/agendar
+Content-Type: application/json
+
+{
+  "nombre": "Test User",
+  "email": "email_invalido",
+  "fecha": "2024-03-15",
+  "hora": "14:30",
+  "descripcion": "Esta es una descripción válida de una cita"
+}
+
+###
+
+## Ejemplo de validación: Fecha en el pasado
+POST http://localhost:8000/citas/agendar
+Content-Type: application/json
+
+{
+  "nombre": "Test User",
+  "email": "test@example.com",
+  "fecha": "2020-03-15",
+  "hora": "14:30",
+  "descripcion": "Esta es una descripción válida de una cita"
+}
+
+###
+
+## Ejemplo de validación: Campo requerido faltante
+POST http://localhost:8000/citas/agendar
+Content-Type: application/json
+
+{
+  "nombre": "Test User",
+  "email": "test@example.com",
+  "fecha": "2024-03-15",
+  "hora": "14:30"
+}
+
+###
+

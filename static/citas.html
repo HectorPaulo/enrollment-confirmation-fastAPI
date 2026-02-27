@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Listado de citas</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; }
+        h1 { margin: 0 0 16px; }
+        .actions { display: flex; gap: 10px; margin-bottom: 16px; }
+        button { padding: 10px 14px; border: none; background: #0c5460; color: #fff; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #aaa; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #ddd; }
+        th { background: #f0f0f0; }
+        .badge { display: inline-block; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .ok { background: #d4edda; color: #155724; }
+        .pendiente { background: #fff3cd; color: #856404; }
+        .message { margin: 12px 0; color: #666; }
+        @media (max-width: 800px) {
+            table, thead, tbody, th, td, tr { display: block; }
+            th { position: sticky; top: 0; }
+            td { border-bottom: 0; padding: 6px 0; }
+            tr { border-bottom: 1px solid #ddd; padding: 8px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Citas creadas</h1>
+        <div class="actions">
+            <button id="btnCargar">Recargar</button>
+        </div>
+        <div id="mensaje" class="message"></div>
+        <table id="tablaCitas">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Descripción</th>
+                    <th>Confirmación</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const tablaBody = document.querySelector('#tablaCitas tbody');
+        const mensaje = document.getElementById('mensaje');
+        const btnCargar = document.getElementById('btnCargar');
+
+        async function cargarCitas() {
+            btnCargar.disabled = true;
+            mensaje.textContent = 'Cargando citas...';
+
+            try {
+                const response = await fetch('/citas');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    mensaje.textContent = data.detail || 'No se pudo cargar el listado.';
+                    return;
+                }
+
+                tablaBody.innerHTML = '';
+                if (!data.length) {
+                    mensaje.textContent = 'No hay citas registradas.';
+                    return;
+                }
+
+                data.forEach(cita => {
+                    const tr = document.createElement('tr');
+                    let estado;
+                    if (cita.confirmada) {
+                        estado = '<span class="badge ok">✅ Confirmada</span>';
+                    } else {
+                        estado = '<span class="badge pendiente">⏳ Pendiente de confirmar</span>';
+                    }
+
+                    tr.innerHTML = `
+                        <td>${cita.nombre}</td>
+                        <td>${cita.email}</td>
+                        <td>${cita.fecha}</td>
+                        <td>${cita.hora}</td>
+                        <td>${cita.descripcion}</td>
+                        <td>${estado}</td>
+                    `;
+                    tablaBody.appendChild(tr);
+                });
+
+                mensaje.textContent = `Total: ${data.length} cita(s).`;
+            } catch (err) {
+                mensaje.textContent = `Error de conexión: ${err.message}`;
+            } finally {
+                btnCargar.disabled = false;
+            }
+        }
+
+        btnCargar.addEventListener('click', cargarCitas);
+        cargarCitas();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamiento de citas - Papuempresa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .nav-links a {
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a.active {
+            background-color: #0c5460;
+            color: white;
+        }
+
+        .nav-links a:not(.active) {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .nav-links a:hover {
+            background-color: #0c5460;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f3f3f3;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #0c5460;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .message.loading {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #0c5460;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-field {
+            border-color: #dc3545 !important;
+        }
+
+        .field-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field-error.show {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background: #f0f0f0;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.ok {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.no {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div >
+        <div class="header">
+            <h1>Agendamiento de Citas</h1>
+            <p>Gestiona tus citas de forma simple y rápida</p>
+            <div class="nav-links">
+                <a href="#" id="linkFormulario" class="nav-link active">Agendar Cita</a>
+                <a href="#" id="linkCitas" class="nav-link">Ver Citas</a>
+            </div>
+        </div>
+
+        <div id="mensaje" class="message"></div>
+
+        <div id="seccionFormulario">
+            <p style="color: #f3f3f3; font-size: 14px; margin-bottom: 20px;">Completa el formulario para reservar tu cita</p>
+            <form id="formularioCita" novalidate>
+            <div class="form-group">
+                <label for="nombre">Nombre *</label>
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    placeholder="Tu nombre completo"
+                    required
+                />
+                <div class="field-error" id="error-nombre"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo Electrónico *</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="tu@email.com"
+                    required
+                />
+                <div class="field-error" id="error-email"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fecha">Fecha *</label>
+                    <input
+                        type="date"
+                        id="fecha"
+                        name="fecha"
+                        required
+                    />
+                    <div class="field-error" id="error-fecha"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hora">Hora *</label>
+                    <input
+                        type="time"
+                        id="hora"
+                        name="hora"
+                        required
+                    />
+                    <div class="field-error" id="error-hora"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripción de la Cita *</label>
+                <textarea
+                    id="descripcion"
+                    name="descripcion"
+                    placeholder="Cuéntanos brevemente el motivo de tu cita..."
+                    required
+                ></textarea>
+                <div class="field-error" id="error-descripcion"></div>
+            </div>
+
+            <button type="submit" class="btn" id="botonEnviar">Agendar Cita</button>
+            </form>
+        </div>
+
+        <div id="seccionCitas" style="display: none;">
+            <h2 style="margin-bottom: 20px; color: #f3f3f3;">Mis Citas</h2>
+            <div class="actions" style="margin-bottom: 16px;">
+                <button id="btnCargar" class="btn" style="width: auto;">Recargar</button>
+            </div>
+            <div id="mensajeCitas" class="message"></div>
+            <table id="tablaCitas" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Descripción</th>
+                        <th>Confirmación</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        const formulario = document.getElementById('formularioCita');
+        const mensajeDiv = document.getElementById('mensaje');
+        const botonEnviar = document.getElementById('botonEnviar');
+        const seccionFormulario = document.getElementById('seccionFormulario');
+        const seccionCitas = document.getElementById('seccionCitas');
+        const linkFormulario = document.getElementById('linkFormulario');
+        const linkCitas = document.getElementById('linkCitas');
+        const btnCargar = document.getElementById('btnCargar');
+        const tablaCitas = document.getElementById('tablaCitas');
+        const mensajeCitas = document.getElementById('mensajeCitas');
+        const tablaBody = document.querySelector('#tablaCitas tbody');
+
+        // Navegación entre pestañas
+        linkFormulario.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarFormulario();
+        });
+
+        linkCitas.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarCitas();
+        });
+
+        function mostrarFormulario() {
+            seccionFormulario.style.display = 'block';
+            seccionCitas.style.display = 'none';
+            linkFormulario.classList.add('active');
+            linkCitas.classList.remove('active');
+        }
+
+        function mostrarCitas() {
+            seccionFormulario.style.display = 'none';
+            seccionCitas.style.display = 'block';
+            linkFormulario.classList.remove('active');
+            linkCitas.classList.add('active');
+            cargarCitas();
+        }
+
+        // Cargar citas
+        async function cargarCitas() {
+            btnCargar.disabled = true;
+            mensajeCitas.textContent = 'Cargando citas...';
+            mensajeCitas.className = 'message loading';
+            mensajeCitas.style.display = 'block';
+            tablaCitas.style.display = 'none';
+
+            try {
+                const response = await fetch('/citas');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    mensajeCitas.textContent = data.detail || 'No se pudo cargar el listado.';
+                    mensajeCitas.className = 'message error';
+                    return;
+                }
+
+                tablaBody.innerHTML = '';
+                if (!data.length) {
+                    mensajeCitas.textContent = 'No hay citas registradas.';
+                    mensajeCitas.className = 'message';
+                    mensajeCitas.style.display = 'block';
+                    return;
+                }
+
+                data.forEach(cita => {
+                    const tr = document.createElement('tr');
+                    const estado = cita.confirmada ?
+                        '<span class="badge ok">Confirmada</span>' :
+                        '<span class="badge no">Pendiente</span>';
+                    const desc = cita.descripcion.length > 30 ? cita.descripcion.substring(0, 30) + '...' : cita.descripcion;
+
+                    tr.innerHTML = `
+                        <td style="color: #f3f3f3">${cita.nombre}</td>
+                        <td style="color: #f3f3f3">${cita.email}</td>
+                        <td style="color: #f3f3f3">${cita.fecha}</td>
+                        <td style="color: #f3f3f3">${cita.hora}</td>
+                        <td style="color: #f3f3f3" title="${cita.descripcion}">${desc}</td>
+                        <td>${estado}</td>
+                    `;
+                    tablaBody.appendChild(tr);
+                });
+
+                mensajeCitas.textContent = `Total: ${data.length} cita(s).`;
+                mensajeCitas.className = 'message success';
+                tablaCitas.style.display = 'table';
+            } catch (err) {
+                mensajeCitas.textContent = `Error de conexión: ${err.message}`;
+                mensajeCitas.className = 'message error';
+            } finally {
+                btnCargar.disabled = false;
+            }
+        }
+
+        btnCargar.addEventListener('click', cargarCitas);
+
+        // Formulario - Establecer fecha mínima a hoy
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha').setAttribute('min', hoy);
+
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Limpiar errores previos
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error-field'));
+
+            // Obtener valores del formulario
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+            const descripcion = document.getElementById('descripcion').value.trim();
+
+            // Validación básica
+            let erroresEncontrados = false;
+
+            if (!nombre) {
+                mostrarError('nombre', 'El nombre es requerido');
+                erroresEncontrados = true;
+            }
+
+            if (!email) {
+                mostrarError('email', 'El correo electrónico es requerido');
+                erroresEncontrados = true;
+            } else if (!validarEmail(email)) {
+                mostrarError('email', 'Por favor ingresa un correo válido');
+                erroresEncontrados = true;
+            }
+
+            if (!fecha) {
+                mostrarError('fecha', 'La fecha es requerida');
+                erroresEncontrados = true;
+            }
+
+            if (!hora) {
+                mostrarError('hora', 'La hora es requerida');
+                erroresEncontrados = true;
+            }
+
+            if (!descripcion) {
+                mostrarError('descripcion', 'La descripción es requerida');
+                erroresEncontrados = true;
+            } else if (descripcion.length < 10) {
+                mostrarError('descripcion', 'La descripción debe tener al menos 10 caracteres');
+                erroresEncontrados = true;
+            }
+
+            if (erroresEncontrados) {
+                return;
+            }
+
+            // Enviar al servidor
+            await enviarCita(nombre, email, fecha, hora, descripcion);
+        });
+
+        function validarEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function mostrarError(campo, mensaje) {
+            const errorDiv = document.getElementById(`error-${campo}`);
+            const inputField = document.getElementById(campo);
+            errorDiv.textContent = mensaje;
+            errorDiv.classList.add('show');
+            inputField.classList.add('error-field');
+        }
+
+        async function enviarCita(nombre, email, fecha, hora, descripcion) {
+            botonEnviar.disabled = true;
+
+            mostrarMensaje('loading', '<span class="loading-spinner"></span>Procesando tu cita...');
+
+            try {
+                const response = await fetch('/citas/agendar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nombre,
+                        email,
+                        fecha,
+                        hora,
+                        descripcion
+                    })
+                });
+
+                const datos = await response.json();
+
+                if (response.ok) {
+                    mostrarMensaje('success', '✅ ¡Cita registrada! Te hemos enviado un email con un enlace para confirmar tu cita. Por favor revisa tu bandeja de entrada y haz clic en el botón de confirmación.');
+                    formulario.reset();
+
+                    // Reestablecer fecha mínima
+                    document.getElementById('fecha').setAttribute('min', hoy);
+
+                    // Ocultar mensaje después de 8 segundos
+                    setTimeout(() => {
+                        mensajeDiv.classList.remove('success');
+                        mensajeDiv.style.display = 'none';
+                    }, 8000);
+                } else {
+                    mostrarMensaje('error', `❌ Error: ${datos.detail || 'No pudimos procesar tu cita. Por favor intenta más tarde.'}`);
+                }
+            } catch (error) {
+                mostrarMensaje('error', `❌ Error de conexión: ${error.message}`);
+            } finally {
+                botonEnviar.disabled = false;
+            }
+        }
+
+        function mostrarMensaje(tipo, mensaje) {
+            mensajeDiv.className = `message ${tipo}`;
+            mensajeDiv.innerHTML = mensaje;
+            mensajeDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
